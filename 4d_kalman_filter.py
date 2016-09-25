@@ -7,8 +7,7 @@
 from math import *
 
 class matrix:
-    
-    # implements basic operations of a matrix class
+    """implements basic operations of a matrix class"""
     
     def __init__(self, value):
         self.value = value
@@ -27,6 +26,7 @@ class matrix:
             self.value = [[0 for row in range(dimy)] for col in range(dimx)]
     
     def identity(self, dim):
+        """Return a valid identity matrix for the given matrix dimensions"""
         # check if valid dimension
         if dim < 1:
             raise ValueError, "Invalid size of matrix"
@@ -43,6 +43,7 @@ class matrix:
         print ' '
     
     def __add__(self, other):
+        """Modifies the default action given by '+' operations with a matrix object"""
         # check if correct dimensions
         if self.dimx != other.dimx or self.dimy != other.dimy:
             raise ValueError, "Matrices must be of equal dimensions to add"
@@ -56,6 +57,7 @@ class matrix:
             return res
     
     def __sub__(self, other):
+        """Modified the default action given by a '-' operation with matrix objects"""
         # check if correct dimensions
         if self.dimx != other.dimx or self.dimy != other.dimy:
             raise ValueError, "Matrices must be of equal dimensions to subtract"
@@ -69,6 +71,7 @@ class matrix:
             return res
     
     def __mul__(self, other):
+        """Modifies the default action given by multiplication 'x' actions on matrices"""
         # check if correct dimensions
         if self.dimy != other.dimx:
             raise ValueError, "Matrices must be m*n and n*p to multiply"
@@ -83,6 +86,7 @@ class matrix:
             return res
     
     def transpose(self):
+        """Returns a transpose of the given matrix object instance"""
         # compute transpose
         res = matrix([[]])
         res.zero(self.dimy, self.dimx)
@@ -174,19 +178,43 @@ initial_xy = [4., 12.]
 # measurements = [[1., 17.], [1., 15.], [1., 13.], [1., 11.]]
 # initial_xy = [1., 19.]
 
+#set dt - time interval between measurements to be 0.1.
 dt = 0.1
 
+# set initial x, y positions to initial positions, and x, y velocities to zero
 x = matrix([[initial_xy[0]], [initial_xy[1]], [0.], [0.]]) # initial state (location and velocity)
-u = matrix([[0.], [0.], [0.], [0.]]) # external motion
+u = matrix([[0.], [0.], [0.], [0.]]) # external motion - this is external change to motion, not velocity of the robot.
 
 #### DO NOT MODIFY ANYTHING ABOVE HERE ####
 #### fill this in, remember to use the matrix() function!: ####
 
-P =  # initial uncertainty: 0 for positions x and y, 1000 for the two velocities
-F =  matrix([[1., 0, 0.1, 0], [0, 1., 0, 0.1], [0, 0, 1., 0][0, 0, 0, 1]]) # generalized to 4d
-H =  # measurement function: reflect the fact that we observe x and y but not the two velocities
-R =  # measurement uncertainty: use 2x2 matrix with 0.1 as main diagonal
-I =  matrix([[1., 0, 0, 0], [0, 1., 0, 0][0, 0, 1., 0], [0, 0, 0, 1.]]) # 4d identity matrix
+P =  matrix([[0, 0, 0, 0],
+             [0, 0, 0, 0],
+             [0, 0, 1000, 0],
+             [0, 0, 0, 1000]]) # initial uncertainty: 0 for positions x and y, 1000 for the two velocities
+
+F =  matrix([[1., 0, dt, 0],
+             [0, 1., 0, dt],
+             [0, 0, 1., 0],
+             [0, 0, 0, 1]]) # generalized to 4d
+
+H =  matrix([[1, 0, 0, 0],
+             [0, 1, 0, 0]]) # measurement function: reflect the fact that we observe x and y but not the two velocities
+
+R =  matrix([[dt, 0], [0, dt]]) # measurement uncertainty: use 2x2 matrix with 0.1 as main diagonal
+
+I =  matrix([[1., 0, 0, 0],
+             [0, 1., 0, 0],
+             [0, 0, 1., 0],
+             [0, 0, 0, 1.]]) # 4d identity matrix - all elements of the principle diagonal are all ones.
+                             # when a compatible matrix is multiplied by an identity 
+
+# Notes on the above:
+# H is a projection matrix, which is designed to create a 1 column and 2 row matrix that only
+# contains the positions x and y, and not the velocities of each, since we can't directly measure them.
+# F is a state transition matrix, which must determine the new states of positions based on the current positional
+# and velocity data within x. New data for x is determined using this matrix, which must be 4 x 4 since
+# we have 4 dimensions within x: x_position, y_position, x_velocity, y_velocity.
 
 ###### DO NOT MODIFY ANYTHING HERE #######
 

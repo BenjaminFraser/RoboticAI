@@ -23,6 +23,7 @@ class matrix:
             self.value = [[0 for row in range(dimy)] for col in range(dimx)]
     
     def identity(self, dim):
+        """Return a valid identity matrix for the given matrix dimensions"""
         # check if valid dimension
         if dim < 1:
             raise ValueError, "Invalid size of matrix"
