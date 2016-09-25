@@ -184,6 +184,7 @@ dt = 0.1
 # set initial x, y positions to initial positions, and x, y velocities to zero
 x = matrix([[initial_xy[0]], [initial_xy[1]], [0.], [0.]]) # initial state (location and velocity)
 u = matrix([[0.], [0.], [0.], [0.]]) # external motion - this is external change to motion, not velocity of the robot.
+                                     # we would use this if we had control over the motion of the robot and wanted to make a change.
 
 #### DO NOT MODIFY ANYTHING ABOVE HERE ####
 #### fill this in, remember to use the matrix() function!: ####
@@ -201,7 +202,8 @@ F =  matrix([[1., 0, dt, 0],
 H =  matrix([[1, 0, 0, 0],
              [0, 1, 0, 0]]) # measurement function: reflect the fact that we observe x and y but not the two velocities
 
-R =  matrix([[dt, 0], [0, dt]]) # measurement uncertainty: use 2x2 matrix with 0.1 as main diagonal
+R =  matrix([[dt, 0], [0, dt]]) # measurement noise uncertainty: use 2x2 matrix with 0.1 as main diagonal
+                                # this assumes each measurement has an uncertainty covariance of 0.1
 
 I =  matrix([[1., 0, 0, 0],
              [0, 1., 0, 0],
