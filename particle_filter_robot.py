@@ -107,25 +107,26 @@ class robot:
 #myrobot = myrobot.move(-pi/2, 10.0)
 #print myrobot.sense()
 
-def particle_list(n):
+def particle_list(size, fwd_noise=0, turn_noise=0, sense_noise=0):
     p_list = []
     for particle in range(n):
         inst = robot()
-        inst.set_noise(0.05, 0.05, 5.0)
+        inst.set_noise(fwd_noise, turn_noise, sense_noise)
         p_list.append(inst)
     return p_list
 
-def particle_move(particle_list):
+def particle_move(particle_list, move_angle, move_distance):
     p_list = []
     for i in range(particle_list):
-        p_list.append(particle_list[i].move(0.1, 5.0))
+        p_list.append(particle_list[i].move(move_angle, move_distance))
     return p_list
 
 def particle_weights(robot, particle_list):
     weights = []
-    Z = robot.sense()
+    Z = myrobot.sense()
     for i in range(particle_list):
         weights.append(particle_list[i].measurement_prob(Z))
+    return weights
 
 def select_particle(particle_list, particle_weights):
     maximum = sum(particle_weights)
@@ -136,9 +137,24 @@ def select_particle(particle_list, particle_weights):
         if current > choice:
             return particle
 
+def resampling(particle_list, particle_weights):
+    """Takes a given list of particle x and y positions and heading direction, and a list of 
+        equivalent particle weights, and randomly resamples the list according to weighted 
+        probabilities. Particles with higher importance weight are more likely to be resampled."""
+    if len(particle_list) == particle_weights:
+        p_list = []
+        for i in range(particle_list):
+            p_list.append(select_particle(particle_list, particle_weights))
+        p_weights = particle_weights(myrobot, p_list)
+        return p_list, p_weights
+    else:
+        raise ValueError("Particle list and particle weights are not equal length!")
 
 
 N = 1000
-p = particle_list(N)
+myrobot = robot()
+p = particle_list(N, 0.05, 0.05, 5.0)
+p = particle_move(0.1, 5.0)
+p_weights = particle_weights(myrobot, p)
 
 print len(p)
