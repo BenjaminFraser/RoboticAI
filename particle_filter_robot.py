@@ -88,6 +88,8 @@ class robot:
             likely this measurement is to be accurate. In essence, this provides us with
             an imortance weight to assign individual particles based on their location."""
         prob = 1.0;
+        # determine how far the predicted measurements (measurement arg) lies from actual belief
+        # note: there MUST be measurement noise for this, otherwise 0/0 indeterminate will raise an exception.
         for i in range(len(landmarks)):
             dist = sqrt((self.x - landmarks[i][0]) ** 2 + (self.y - landmarks[i][1]) ** 2)
             prob *= self.Gaussian(dist, self.sense_noise, measurement[i])
@@ -105,14 +107,36 @@ class robot:
 #myrobot = myrobot.move(-pi/2, 10.0)
 #print myrobot.sense()
 
-####   DON'T MODIFY ANYTHING ABOVE HERE! ENTER CODE BELOW ####
-
 def particle_list(n):
     p_list = []
     for particle in range(n):
         inst = robot()
+        inst.set_noise(0.05, 0.05, 5.0)
         p_list.append(inst)
     return p_list
+
+def particle_move(particle_list):
+    p_list = []
+    for i in range(particle_list):
+        p_list.append(particle_list[i].move(0.1, 5.0))
+    return p_list
+
+def particle_weights(robot, particle_list):
+    weights = []
+    Z = robot.sense()
+    for i in range(particle_list):
+        weights.append(particle_list[i].measurement_prob(Z))
+
+def select_particle(particle_list, particle_weights):
+    maximum = sum(particle_weights)
+    choice = random.uniform(0, maximum) 
+    current = 0
+    for n, particle in enumerate(particle_list):
+        current += particle_weights[n]
+        if current > choice:
+            return particle
+
+
 
 N = 1000
 p = particle_list(N)
