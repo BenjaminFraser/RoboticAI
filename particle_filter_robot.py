@@ -167,16 +167,35 @@ def resampling(particle_list, particle_weights):
     else:
         raise ValueError("Particle list and particle weights are not equal length!")
 
+def distance_eval(robot, p_list):
+    """Takes a robot instance, and an associated particle list, and determines the average error of all 
+        the particles relative to the robots actual position. The function determines the euclidean distance
+        between the robots x,y positions and the average particles x,y positions
+    Args:
+        robot: An instance of the robot class.
+        p_list (list): A list of particle positions and orientations of size N.
+    Returns:
+        The average euclidean distance between the particles and actual robot position of the filter, as a float.
+    """
+    sum = 0.0;
+    for i in range(len(p_list)): # calculate mean error by iterating through p
+        dx = (p_list[i].x - robot.x + (world_size/2.0)) % world_size - (world_size/2.0)
+        dy = (p_list[i].y - robot.y + (world_size/2.0)) % world_size - (world_size/2.0)
+        err = sqrt(dx * dx + dy * dy)
+        sum += err
+    return sum / float(len(p_list))
 
 N = 1000
 myrobot = robot()
 p = particle_list(N, 0.05, 0.05, 5.0)
-p = particle_move(p, 0.1, 5.0)
 p_weights = assign_particle_weights(myrobot, p)
 
-print len(p)
+for i in range(10):
+    myrobot = myrobot.move(0.1, 5.0)
+    p = particle_move(p, 0.1, 5.0)
+    p, p_weights = resampling(p, p_weights)
+    print distance_eval(myrobot, p)
 
 # test resampling algorithm functions
 print len(p), len(p_weights)
-p, p_weights = resampling(p, p_weights)
-print len(p), len(p_weights)
+print p
