@@ -109,7 +109,7 @@ class robot:
 
 def particle_list(size, fwd_noise=0, turn_noise=0, sense_noise=0):
     p_list = []
-    for particle in range(n):
+    for particle in range(size):
         inst = robot()
         inst.set_noise(fwd_noise, turn_noise, sense_noise)
         p_list.append(inst)
@@ -117,18 +117,28 @@ def particle_list(size, fwd_noise=0, turn_noise=0, sense_noise=0):
 
 def particle_move(particle_list, move_angle, move_distance):
     p_list = []
-    for i in range(particle_list):
+    for i in range(len(particle_list)):
         p_list.append(particle_list[i].move(move_angle, move_distance))
     return p_list
 
-def particle_weights(robot, particle_list):
+def assign_particle_weights(robot, particle_list):
     weights = []
     Z = myrobot.sense()
-    for i in range(particle_list):
+    for i in range(len(particle_list)):
         weights.append(particle_list[i].measurement_prob(Z))
     return weights
 
 def select_particle(particle_list, particle_weights):
+    """Selects a single particle within a list of many particles (particle list), based on the probabilistic 
+        weight assigned to each particle, as in the particle weights list. Each index within particle list
+        alligns with the probability weighting within the same index in the particle weights list.
+    Args: 
+        particle_list (list): A list of particle arrays, of the form [x_position, y_position, heading_direction]
+        particle_weights (list): A list of probabilistic particle weights, with indexes corresponding to those
+                                 within particle_list.
+    Returns:
+        The chosen particle in the form [x_position, y_position, heading_direction]
+    """
     maximum = sum(particle_weights)
     choice = random.uniform(0, maximum) 
     current = 0
@@ -140,13 +150,20 @@ def select_particle(particle_list, particle_weights):
 def resampling(particle_list, particle_weights):
     """Takes a given list of particle x and y positions and heading direction, and a list of 
         equivalent particle weights, and randomly resamples the list according to weighted 
-        probabilities. Particles with higher importance weight are more likely to be resampled."""
-    if len(particle_list) == particle_weights:
-        p_list = []
-        for i in range(particle_list):
-            p_list.append(select_particle(particle_list, particle_weights))
-        p_weights = particle_weights(myrobot, p_list)
-        return p_list, p_weights
+        probabilities. Particles with higher importance weight are more likely to be resampled
+    Args: 
+        particle_list (list): A list of particle arrays, of the form [x_position, y_position, heading_direction]
+        particle_weights (list): A list of probabilistic particle weights, with indexes corresponding to those
+                                 within particle_list.
+    Returns: 
+        Updated particle list and particle weights after resampling, in the form updated_list, updated_weights.
+    """
+    if len(particle_list) == len(particle_weights):
+        updated_list = []
+        for i in range(len(particle_list)):
+            updated_list.append(select_particle(particle_list, particle_weights))
+        updated_weights = assign_particle_weights(myrobot, updated_list)
+        return updated_list, updated_weights
     else:
         raise ValueError("Particle list and particle weights are not equal length!")
 
@@ -154,7 +171,12 @@ def resampling(particle_list, particle_weights):
 N = 1000
 myrobot = robot()
 p = particle_list(N, 0.05, 0.05, 5.0)
-p = particle_move(0.1, 5.0)
-p_weights = particle_weights(myrobot, p)
+p = particle_move(p, 0.1, 5.0)
+p_weights = assign_particle_weights(myrobot, p)
 
 print len(p)
+
+# test resampling algorithm functions
+print len(p), len(p_weights)
+p, p_weights = resampling(p, p_weights)
+print len(p), len(p_weights)
