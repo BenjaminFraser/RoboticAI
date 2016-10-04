@@ -94,29 +94,20 @@ class robot:
     #   obtains bearings from positions
     #
     
-    def sense(self): #do not change the name of this function
+    def sense(self, noise=False): #do not change the name of this function
         Z = [0.0 for x in range(4)]
-        # determine where each landmark is in relation to the robot
-        for place in landmarks:
-            if self.x < landmarks[0] and self.y < landmarks[1]:
-                # this landmark is upper right of the robot (landmarks[3])
-                angle_3 = atan2((landmarks[3][1] - self.y), (landmarks[3][0] - self.x))
-                Z[3] = angle_3
-            if self.x > landmarks[0] and self.y < landmarks[1]:
-                # this landmark is upper left of the robot (landmarks[0])
-                angle_0 = atan2(self.x, (landmarks[0][1] - self.y)) + (pi/2.0)
-                Z[0] = angle_0
-            if self.x > landmarks[0] and self.y > landmarks[1]:
-                # this landmark is lower left of the robot (landmarks[1])
-                angle_1 = atan2(self.y, self.x) + pi
-                Z[1] = angle_1
-            if self.x < landmarks[0] and self.y < landmarks[1]:
-                # this landmark is lower right of the robot (landmarks[2])
-                angle_2 = atan2((landmarks[2][0] - self.x), self.y) + (3*pi/2.0)
-                Z[2] = angle_2
-        return Z #Leave this line here. Return vector Z of 4 bearings.
-    
-    ############## ONLY ADD/MODIFY CODE ABOVE HERE ####################
+        # iterate through each of the landmarks and determine angle using atan2:
+        for i in range(len(landmarks)):
+            # sub robots current y,x from landmarks, and subtract orientation for bearing
+            angle = atan2(landmarks[i][0] - self.y, 
+                    landmarks[i][1] - self.x) - self.orientation
+            if bearing_noise:
+                angle += random.gauss(angle, self.bearing_noise)
+            # round angle to 2 * pi.
+            angle %= 2.0 * pi
+            Z[i] = angle
+            
+        return Z
 
 
 ## IMPORTANT: You may uncomment the test cases below to test your code.
