@@ -103,6 +103,7 @@ class robot:
         error = 1.0
         for i in range(len(measurements)):
             error_bearing = abs(measurements[i] - predicted_measurements[i])
+            # obtain an error bearing that lies between -pi and +pi
             error_bearing = (error_bearing + pi) % (2.0 * pi) - pi # truncate
             
 
