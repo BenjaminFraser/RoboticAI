@@ -44,15 +44,13 @@ def search(grid,init,goal,cost):
     closed_cells = []
     closed_cells_g = []
     goal_found = False
-    for i in range(100):
+    while goal_found == False:
         if len(open_list) == 0:
-            path = "error"
+            path = "fail"
             goal_found = True
         # determine lowest g value from open_list, copy it and remove from open_list
         open_list = sorted(open_list, key=lambda x: x[0])
         g_low = open_list.pop(0)
-        print "OPEN LIST IS: {}".format(open_list)
-        print "G_LOW IS: {}".format(g_low)
         adjacent = []
         left = False if g_low[1] == 0 else True
         right = False if g_low[1] == len(grid)-1 else True
@@ -67,13 +65,10 @@ def search(grid,init,goal,cost):
         if up:
             adjacent.append([g_low[0] + cost, g_low[1], g_low[2] -1])
         if adjacent:
-            
             for cell in adjacent:
                 if [cell[1], cell[2]] in closed_cells:
-                    print "skipping this loop."
                     continue
                 if grid[cell[1]][cell[2]] == 1:
-                    print "skipping this loop."
                     continue
                 open_list.append([cell[0], cell[1], cell[2]])
                 if [cell[1], cell[2]] == goal:
@@ -81,9 +76,8 @@ def search(grid,init,goal,cost):
                     goal_found = True
             closed_cells.append([g_low[1], g_low[2]])
             closed_cells_g.append([g_low[0], g_low[1], g_low[2]])
-            print "Added a cell to closed cells."
         else: 
-            return "error"
+            return "fail"
     return path
 
 print search(grid, init, goal, cost)
